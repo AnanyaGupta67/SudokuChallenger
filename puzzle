@@ -1,0 +1,153 @@
+
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include<ctime>
+using namespace std;
+
+void printRule() {
+    cout << endl << endl;
+    cout << "_______________________________________________________________________\n";
+    cout << "    Rule -> Fill the numbers between 1-9 ROW-BY-ROW SEQUENTIALLY      \n\n";
+    cout << "    Note -> You can see the ANSWER at any time :)\n";
+    cout << "______________________________________________________________________\n";
+    cout << endl << endl;
+}
+
+void printArray(vector<vector<int>>& arr) {
+    int n = 9;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            cout << arr[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
+int countZeros(vector<vector<int>>& grid) {
+    int count = 0;
+    for (const auto& row : grid) {
+        for (int num : row) {
+            if (num == 0) {
+                count++;
+            }
+        }
+    }
+    return count;
+}
+
+bool isValid(vector<vector<int>>& arr, int row, int col, int val) {
+    for (int k = 0; k < 9; k++) {
+        if (arr[row][k] == val || arr[k][col] == val)
+            return false;
+        if (arr[3 * (row / 3) + k / 3][3 * (col / 3) + k % 3] == val)
+            return false;
+    }
+    return true;
+}
+
+bool solve(vector<vector<int>>& arr) {
+    int n = 9;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (arr[i][j] == 0) {
+                for (int val = 1; val <= 9; val++) {
+                    if (isValid(arr, i, j, val)) {
+                        arr[i][j] = val;
+                        if (solve(arr))
+                            return true;
+                        else
+                            arr[i][j] = 0;
+                    }
+                }
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+vector<vector<int>> updateArray(vector<vector<int>>& arr){
+    srand(time(nullptr));
+    int rowToSwap = rand() % 9;
+    int colToSwap = rand() % 9;
+    
+    // Swap the elements of the selected row with the selected column
+    for (int i = 0; i < 9; i++) {
+        int temp = arr[i][rowToSwap];
+        arr[i][rowToSwap] = arr[i][colToSwap];
+        arr[i][colToSwap] = temp;
+    }
+    return arr;
+
+}
+
+void working(vector<vector<int>> &arr , int n , vector<vector<int>> &originalArr) {
+    
+    int row, col, digit;
+    int count = countZeros(arr); // Count zeros initially
+
+    while (count > 0) {
+        printRule();
+        cout << "------Sudoku is ------" << endl << endl;
+        printArray(arr);
+        cout << endl << endl;
+        cout << "'0' count -> " << count << endl;
+        cout << "See answer ? (y/n) :";
+        char choice;
+        cin >> choice;
+        if (choice == 'y') {
+            arr = originalArr;
+            if (solve(arr)) {
+                cout << endl << endl;
+                cout << "--- Solved Sudoku is ---" << endl << endl;
+                printArray(arr);
+                cout << endl << "You FAILED !" << endl;
+                break;
+            }
+        }
+        else {
+            cout << endl << "Enter Row : ";
+            cin >> row;
+            cout << endl << "Enter Column : ";
+            cin >> col;
+            cout << endl << "Enter digit : ";
+            cin >> digit;
+            arr[row][col] = digit;
+            count = countZeros(arr);
+        }
+        
+        }
+        char ans;
+        cout<<"Want to play again? (y/n) :";
+        cin>>ans;
+        if(ans == 'y'){
+            vector<vector<int>> newArr = updateArray(originalArr);
+            system("cls");
+            cout<<endl<<endl<<"____________Play Again :)___________"<<endl<<endl;
+            working(newArr , n , originalArr);
+        }
+        else {
+            return;
+        }
+        
+}
+
+int main() {
+    vector<vector<int>> arr{
+        { 0, 0, 0, 0, 0, 0, 6, 8, 0 },
+        { 0, 0, 0, 0, 7, 3, 0, 0, 9 },
+        { 3, 0, 9, 0, 0, 0, 0, 4, 5 },
+        { 4, 9, 0, 0, 0, 0, 0, 0, 0 },
+        { 8, 0, 3, 0, 5, 0, 9, 0, 2 },
+        { 0, 0, 0, 0, 0, 0, 0, 3, 6 },
+        { 9, 6, 0, 0, 0, 0, 3, 0, 8 },
+        { 7, 0, 0, 6, 8, 0, 0, 0, 0 },
+        { 0, 2, 8, 0, 0, 0, 0, 0, 0 }
+    };
+    int n = arr[0].size(); //size
+    vector<vector<int>> originalArr = arr;
+    system("cls");
+    working(arr , n , originalArr);
+     return 0;
+}
